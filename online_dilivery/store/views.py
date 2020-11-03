@@ -1,19 +1,51 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render,redirect
 from .models import *
 from .forms import OrderForm
 from .filters import OrderFilterSet
 from django.forms import inlineformset_factory
 from django.contrib.auth.forms import UserCreationForm
+from .forms import CustomRegisterForm
+from django.contrib import messages
+from django.contrib.auth import login,authenticate,logout
+from .decorators import *
 
+@unauth_user
 def register(request):
-    form = UserCreationForm()
+    form = CustomRegisterForm()
     if request.method == "POST":
-        form = UserCreationForm(request.POST)
+        form = CustomRegisterForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request,'Success registration')
+            return redirect('home')
     context = {'form':form}
     return render(request,'store/register.html',context)
 
+def user_page(request):
+    orders = request.user.customer.order_set.all()
+    context = {'orders':orders}
+    return render(request,'store/user.html',context)
+
+@unauth_user
+def login_page(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request,username=username,password=password)
+        login(request,user)
+        return redirect('home')
+    context = {}
+    return render(request,'store/login.html',context)
+
+def logout_page(request):
+    logout(request)
+    return redirect('login')
+
+
+
+@login_required(login_url='login')
+@admin_only
 def home_page(request):
     orders_count = Order.objects.all().count()
     delivered = Order.objects.filter(status='Delivered').count()
@@ -30,6 +62,7 @@ def product_page(request):
     context = {'products':products}
     return render(request,'store/products.html',context)
 
+@admin_only
 def customer_page(request,pk):
     customer = Customer.objects.get(id=pk)
     orders = customer.order_set.all()
@@ -43,7 +76,7 @@ def customer_page(request,pk):
 def create_order(request,pk):
     OrderFormSet = inlineformset_factory(Customer, Order, fields=('product', 'status'))
     customer = Customer.objects.get(id=pk)
-    formset = OrderFormSet(instance=customer)
+    formset = OrderFormSet(queryset=Order.objects.none(),instance=customer)
     if request.method == 'POST':
         formset = OrderForm(request.POST,instance=customer)
         if formset.is_valid():
