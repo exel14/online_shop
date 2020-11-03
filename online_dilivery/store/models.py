@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 class Tag(models.Model):
@@ -21,10 +22,12 @@ class Product(models.Model):
         return self.name
 
 class Customer(models.Model):
+    user = models.OneToOneField(User,null=True,blank=True,on_delete=models.CASCADE)
     full_name = models.CharField(max_length=200,null=True)
     email = models.CharField(max_length=200,null=True)
     address = models.CharField(max_length=200,null=True)
     telephone = models.CharField(max_length=200,null=True)
+    image_field = models.ImageField(null=True)
 
     def __str__(self):
         return self.full_name
