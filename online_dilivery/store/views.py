@@ -1,7 +1,8 @@
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render,redirect
 from .models import *
-from .forms import OrderForm,UserProfile
+from .forms import OrderForm, UserProfile
 from .filters import OrderFilterSet
 from django.forms import inlineformset_factory
 from django.contrib.auth.forms import UserCreationForm
@@ -9,18 +10,20 @@ from .forms import CustomRegisterForm
 from django.contrib import messages
 from django.contrib.auth import login,authenticate,logout
 from .decorators import *
-
 @unauth_user
 def register(request):
     form = CustomRegisterForm()
-    if request.method == "POST":
+    if request.method == 'POST':
         form = CustomRegisterForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()
+            group = Group.objects.get(name='customer')
+            Customer.objects.create(user=user,full_name=user.username)
+            user.groups.add(group)
             messages.success(request,'Success registration')
             return redirect('home')
     context = {'form':form}
-    return render(request,'store/register.html',context)
+    return render(request, 'store/register.html',context)
 
 def user_page(request):
     orders = request.user.customer.order_set.all()

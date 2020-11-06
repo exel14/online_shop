@@ -4,6 +4,8 @@ body {
     font-size: 1rem;
     overflow-x: hidden;
     color: #607289;
+
+
 }
 
 h5 {
@@ -28,4 +30,5 @@ a:hover {
 
 footer {
   background: #ebf4fa;
+  margin-right:10000px;
 }

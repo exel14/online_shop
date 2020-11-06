@@ -27,7 +27,7 @@ class Customer(models.Model):
     email = models.CharField(max_length=200,null=True)
     address = models.CharField(max_length=200,null=True)
     telephone = models.CharField(max_length=200,null=True)
-    image_field = models.ImageField(null=True,blank=True)
+    image_field = models.ImageField(null=True,blank=True,default='default_image.jpg')
     github_link = models.CharField(null=True,blank=True,max_length=100)
     insta_link = models.CharField(null=True, blank=True,max_length=100)
     twitter_link = models.CharField(null=True, blank=True,max_length=100)
